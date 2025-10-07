@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pokémon Interactive App</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom right, #f9e6ff, #e0f7fa);
+    color: #333;
+    text-align: center;
+    padding: 20px;
+  }
+  h1 { color: #ff4c4c; margin-bottom: 10px; }
+  nav button {
+    margin: 5px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 10px;
+    background: #ffcc00;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  nav button:hover { background: #ffd633; }
+  section { display: none; margin-top: 20px; }
+  .active { display: block; }
+  input, button {
+    padding: 8px;
+    margin: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  .pokemon-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    display: inline-block;
+    padding: 15px;
+    margin: 10px;
+    width: 220px;
+  }
+  img { width: 120px; height: 120px; }
+  .stats { text-align: left; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Pokémon Interactive App ⚔️</h1>
+
+<nav>
+  <button onclick="showSection('search')">🔍 Tìm kiếm</button>
+  <button onclick="showSection('random')">🎲 Ngẫu nhiên</button>
+  <button onclick="showSection('quiz')">❓ Quiz</button>
+  <button onclick="showSection('battle')">⚔️ Trận đấu</button>
+</nav>
+
+<!-- Search -->
+<section id="search" class="active">
+  <h2>🔍 Tìm kiếm Pokémon</h2>
+  <input type="text" id="pokemonInput" placeholder="Nhập tên hoặc ID Pokémon...">
+  <button onclick="searchPokemon()">Tìm kiếm</button>
+  <div id="pokemonDisplay"></div>
+</section>
+
+<!-- Random -->
+<section id="random">
+  <h2>🎲 Pokémon Ngẫu nhiên</h2>
+  <button onclick="getRandomPokemon()">Hiển thị Pokémon bất kỳ</button>
+  <div id="randomDisplay"></div>
+</section>
+
+<!-- Quiz -->
+<section id="quiz">
+  <h2>❓ Quiz Pokémon</h2>
+  <p>Đoán xem Pokémon này thuộc hệ gì?</p>
+  <div id="quizDisplay"></div>
+  <div id="quizOptions"></div>
+  <p id="quizResult"></p>
+  <button onclick="loadQuiz()">🔁 Câu hỏi mới</button>
+</section>
+
+<!-- Battle -->
+<section id="battle">
+  <h2>⚔️ Trận đấu Pokémon</h2>
+  <input type="text" id="myPokemon" placeholder="Tên Pokémon của bạn">
+  <button onclick="battle()">Bắt đầu đấu!</button>
+  <div id="battleResult"></div>
+</section>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+async function fetchPokemon(nameOrId) {
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nameOrId.toLowerCase()}`);
+  if (!res.ok) throw new Error("Không tìm thấy Pokémon!");
+  return await res.json();
+}
+
+function displayPokemon(pokemon, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = `
+    <div class="pokemon-card">
+      <h3>${pokemon.name.toUpperCase()}</h3>
+      <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
+      <p><strong>Hệ:</strong> ${pokemon.types.map(t => t.type.name).join(", ")}</p>
+      <div class="stats">
+        <strong>Chỉ số:</strong>
+        <ul>
+          ${pokemon.stats.map(s => `<li>${s.stat.name}: ${s.base_stat}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+async function searchPokemon() {
+  const name = document.getElementById("pokemonInput").value.trim();
+  if (!name) return alert("Vui lòng nhập tên hoặc ID!");
+  try {
+    const pokemon = await fetchPokemon(name);
+    displayPokemon(pokemon, "pokemonDisplay");
+  } catch {
+    alert("Không tìm thấy Pokémon!");
+  }
+}
+
+async function getRandomPokemon() {
+  const randomId = Math.floor(Math.random() * 898) + 1;
+  const pokemon = await fetchPokemon(randomId);
+  displayPokemon(pokemon, "randomDisplay");
+}
+
+// --- Quiz Mode ---
+async function loadQuiz() {
+  const randomId = Math.floor(Math.random() * 898) + 1;
+  const pokemon = await fetchPokemon(randomId);
+  displayPokemon(pokemon, "quizDisplay");
+
+  const correctType = pokemon.types[0].type.name;
+  const allTypes = ["normal","fire","water","grass","electric","ice","fighting","poison","ground","flying","psychic","bug","rock","ghost","dragon","dark","steel","fairy"];
+  const options = [correctType];
+
+  while (options.length < 4) {
+    const rand = allTypes[Math.floor(Math.random() * allTypes.length)];
+    if (!options.includes(rand)) options.push(rand);
+  }
+  options.sort(() => Math.random() - 0.5);
+
+  const btns = options.map(opt => `<button onclick="checkAnswer('${opt}','${correctType}')">${opt}</button>`).join(" ");
+  document.getElementById("quizOptions").innerHTML = btns;
+  document.getElementById("quizResult").innerHTML = "";
+}
+
+function checkAnswer(selected, correct) {
+  const result = selected === correct ? "🎉 Chính xác!" : `❌ Sai rồi! Đáp án là ${correct}`;
+  document.getElementById("quizResult").innerText = result;
+}
+
+// --- Battle Mode ---
+async function battle() {
+  const input = document.getElementById("myPokemon").value.trim();
+  if (!input) return alert("Nhập Pokémon của bạn trước!");
+  try {
+    const myPokemon = await fetchPokemon(input);
+    const enemyPokemon = await fetchPokemon(Math.floor(Math.random() * 898) + 1);
+
+    const myPower = myPokemon.stats.reduce((sum, s) => sum + s.base_stat, 0);
+    const enemyPower = enemyPokemon.stats.reduce((sum, s) => sum + s.base_stat, 0);
+
+    let result = "";
+    if (myPower > enemyPower) result = "🎉 Bạn thắng!";
+    else if (myPower < enemyPower) result = "😢 Bạn thua!";
+    else result = "🤝 Hòa nhau!";
+
+    document.getElementById("battleResult").innerHTML = `
+      <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
+        <div class="pokemon-card">
+          <h3>${myPokemon.name.toUpperCase()} (Bạn)</h3>
+          <img src="${myPokemon.sprites.front_default}">
+          <p><strong>Điểm:</strong> ${myPower}</p>
+        </div>
+        <div class="pokemon-card">
+          <h3>${enemyPokemon.name.toUpperCase()} (Đối thủ)</h3>
+          <img src="${enemyPokemon.sprites.front_default}">
+          <p><strong>Điểm:</strong> ${enemyPower}</p>
+        </div>
+      </div>
+      <h3>${result}</h3>
+    `;
+  } catch {
+    alert("Không tìm thấy Pokémon!");
+  }
+}
+
+// Khởi động quiz đầu tiên
+loadQuiz();
+</script>
+</body>
+</html>

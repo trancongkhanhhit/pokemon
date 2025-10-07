@@ -209,13 +209,13 @@ async function battle() {
   }
 }
 
-// --- AI Suggestion (Offline mô phỏng) ---
+// --- AI Suggestion
 async function suggestPokemon() {
   const input = document.getElementById("aiInput").value.trim().toLowerCase();
   const resultDiv = document.getElementById("aiResult");
   resultDiv.innerHTML = "<p>🤖 AI đang suy nghĩ...</p>";
 
-  // Mô phỏng trí tuệ AI (không cần API thật)
+  // Mô phỏng trí tuệ AI 
   let suggested = [];
   if (input.includes("lửa")) suggested = ["charizard", "arcanine", "moltres"];
   else if (input.includes("nước")) suggested = ["blastoise", "gyarados", "vaporeon"];

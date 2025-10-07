@@ -1,0 +1,53 @@
+Sử dụng AI trong dự án
+
+Công cụ AI đã dùng: ChatGPT (GPT-5) của OpenAI.
+
+AI hỗ trợ:
+
+Gợi ý cấu trúc giao diện và bố cục HTML.
+
+Hỗ trợ viết mã JavaScript để gọi PokéAPI và xử lý dữ liệu.
+
+Gợi ý phong cách CSS giúp giao diện thân thiện, dễ nhìn.
+
+Thay đổi bố cục, màu sắc, font chữ để phù hợp với người dùng.
+
+Kiểm thử và sửa các lỗi nhỏ khi chuyển đổi giữa các chế độ (search, quiz, battle)
+
+Thêm AI Gợi ý Pokémon: người dùng nhập đặc điểm (ví dụ “lửa”, “nước”) → AI gợi ý Pokémon phù hợp.
+
+# 🎮 Pokémon Interactive App ⚔️
+
+Ứng dụng web đơn giản sử dụng **PokéAPI** để tương tác với dữ liệu Pokémon.  
+Người dùng có thể:
+- 🔍 **Tìm kiếm Pokémon** theo tên hoặc ID.  
+- 🎲 **Xem Pokémon ngẫu nhiên**.  
+- ❓ **Chơi quiz đoán hệ Pokémon**.  
+- ⚔️ **Mô phỏng trận đấu Pokémon** bằng cách so sánh chỉ số.  
+
+---
+
+## 🚀 Tính năng chính
+
+| Tính năng | Mô tả |
+|------------|-------|
+| 🔍 **Tìm kiếm Pokémon** | Nhập tên hoặc ID → hiển thị hình ảnh, hệ và chỉ số. |
+| 🎲 **Pokémon ngẫu nhiên** | Nhấn nút → hiển thị Pokémon bất kỳ. |
+| ❓ **Quiz Pokémon** | Hiển thị Pokémon → hỏi “Thuộc hệ gì?” với 4 lựa chọn. |
+| ⚔️ **Trận đấu Pokémon** | Nhập Pokémon → đấu với Pokémon ngẫu nhiên, so sánh tổng chỉ số. |
+
+---
+
+## 🧩 Công nghệ sử dụng
+
+- **HTML5 / CSS3 / JavaScript (Vanilla JS)**  
+- **PokéAPI** – API cung cấp dữ liệu Pokémon.  
+- **Fetch API** để lấy dữ liệu JSON từ server.  
+
+---
+
+## ⚙️ Cách chạy ứng dụng
+
+  Tải hoặc clone dự án:
+   ```bash
+   git clone https://github.com/your-username/pokemon-interactive-app.git

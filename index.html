@@ -53,6 +53,7 @@
   <button onclick="showSection('random')">🎲 Ngẫu nhiên</button>
   <button onclick="showSection('quiz')">❓ Quiz</button>
   <button onclick="showSection('battle')">⚔️ Trận đấu</button>
+  <button onclick="showSection('aiSuggest')">💡 AI Gợi ý</button>
 </nav>
 
 <!-- Search -->
@@ -88,6 +89,15 @@
   <div id="battleResult"></div>
 </section>
 
+<!-- AI Suggest -->
+<section id="aiSuggest">
+  <h2>💡 AI Gợi ý Pokémon</h2>
+  <p>Nhập đặc điểm bạn muốn (ví dụ: “Pokémon hệ lửa mạnh”, “Pokémon nước dễ thương”)</p>
+  <input type="text" id="aiInput" placeholder="Mô tả Pokémon mong muốn...">
+  <button onclick="suggestPokemon()">Gợi ý</button>
+  <div id="aiResult"></div>
+</section>
+
 <script>
 function showSection(id) {
   document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
@@ -95,16 +105,15 @@ function showSection(id) {
 }
 
 async function fetchPokemon(nameOrId) {
-  const id = String(nameOrId).toLowerCase(); // ép về chuỗi trước khi gọi API
+  const id = String(nameOrId).toLowerCase();
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
   if (!res.ok) throw new Error("Không tìm thấy Pokémon!");
   return await res.json();
 }
 
-
 function displayPokemon(pokemon, containerId) {
   const container = document.getElementById(containerId);
-  container.innerHTML = `
+  container.innerHTML += `
     <div class="pokemon-card">
       <h3>${pokemon.name.toUpperCase()}</h3>
       <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
@@ -124,6 +133,7 @@ async function searchPokemon() {
   if (!name) return alert("Vui lòng nhập tên hoặc ID!");
   try {
     const pokemon = await fetchPokemon(name);
+    document.getElementById("pokemonDisplay").innerHTML = "";
     displayPokemon(pokemon, "pokemonDisplay");
   } catch {
     alert("Không tìm thấy Pokémon!");
@@ -134,39 +144,33 @@ async function getRandomPokemon() {
   const container = document.getElementById("randomDisplay");
   container.innerHTML = "<p>🎲 Đang tải Pokémon ngẫu nhiên...</p>";
   try {
-    const maxPokemon = 1025; // Cập nhật số lượng Pokémon mới nhất
+    const maxPokemon = 1025;
     const randomId = Math.floor(Math.random() * maxPokemon) + 1;
-
     const pokemon = await fetchPokemon(randomId);
+    container.innerHTML = "";
     displayPokemon(pokemon, "randomDisplay");
   } catch (err) {
-    console.error("Lỗi khi gọi API:", err);
-    container.innerHTML = "<p>❌ Không tải được Pokémon! Kiểm tra kết nối hoặc API.</p>";
+    container.innerHTML = "<p>❌ Không tải được Pokémon! Kiểm tra kết nối.</p>";
   }
 }
-
 
 // --- Quiz Mode ---
 async function loadQuiz() {
   const randomId = Math.floor(Math.random() * 898) + 1;
   const pokemon = await fetchPokemon(randomId);
   displayPokemon(pokemon, "quizDisplay");
-
   const correctType = pokemon.types[0].type.name;
   const allTypes = ["normal","fire","water","grass","electric","ice","fighting","poison","ground","flying","psychic","bug","rock","ghost","dragon","dark","steel","fairy"];
   const options = [correctType];
-
   while (options.length < 4) {
     const rand = allTypes[Math.floor(Math.random() * allTypes.length)];
     if (!options.includes(rand)) options.push(rand);
   }
   options.sort(() => Math.random() - 0.5);
-
   const btns = options.map(opt => `<button onclick="checkAnswer('${opt}','${correctType}')">${opt}</button>`).join(" ");
   document.getElementById("quizOptions").innerHTML = btns;
   document.getElementById("quizResult").innerHTML = "";
 }
-
 function checkAnswer(selected, correct) {
   const result = selected === correct ? "🎉 Chính xác!" : `❌ Sai rồi! Đáp án là ${correct}`;
   document.getElementById("quizResult").innerText = result;
@@ -179,15 +183,12 @@ async function battle() {
   try {
     const myPokemon = await fetchPokemon(input);
     const enemyPokemon = await fetchPokemon(Math.floor(Math.random() * 898) + 1);
-
     const myPower = myPokemon.stats.reduce((sum, s) => sum + s.base_stat, 0);
     const enemyPower = enemyPokemon.stats.reduce((sum, s) => sum + s.base_stat, 0);
-
     let result = "";
     if (myPower > enemyPower) result = "🎉 Bạn thắng!";
     else if (myPower < enemyPower) result = "😢 Bạn thua!";
     else result = "🤝 Hòa nhau!";
-
     document.getElementById("battleResult").innerHTML = `
       <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
         <div class="pokemon-card">
@@ -208,7 +209,33 @@ async function battle() {
   }
 }
 
-// Khởi động quiz đầu tiên
+// --- AI Suggestion (Offline mô phỏng) ---
+async function suggestPokemon() {
+  const input = document.getElementById("aiInput").value.trim().toLowerCase();
+  const resultDiv = document.getElementById("aiResult");
+  resultDiv.innerHTML = "<p>🤖 AI đang suy nghĩ...</p>";
+
+  // Mô phỏng trí tuệ AI (không cần API thật)
+  let suggested = [];
+  if (input.includes("lửa")) suggested = ["charizard", "arcanine", "moltres"];
+  else if (input.includes("nước")) suggested = ["blastoise", "gyarados", "vaporeon"];
+  else if (input.includes("cỏ")) suggested = ["venusaur", "leafeon", "sceptile"];
+  else if (input.includes("điện")) suggested = ["pikachu", "jolteon", "raichu"];
+  else if (input.includes("đá")) suggested = ["onix", "golem", "tyranitar"];
+  else if (input.includes("bay")) suggested = ["pidgeot", "noivern", "talonflame"];
+  else suggested = ["eevee", "lucario", "snorlax"]; // fallback gợi ý
+
+  resultDiv.innerHTML = "<h3>✨ Gợi ý của AI:</h3>";
+  for (const name of suggested) {
+    try {
+      const p = await fetchPokemon(name);
+      displayPokemon(p, "aiResult");
+    } catch {
+      resultDiv.innerHTML += `<p>Không tải được dữ liệu cho ${name}</p>`;
+    }
+  }
+}
+
 loadQuiz();
 </script>
 </body>

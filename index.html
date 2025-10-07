@@ -95,10 +95,12 @@ function showSection(id) {
 }
 
 async function fetchPokemon(nameOrId) {
-  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nameOrId.toLowerCase()}`);
+  const id = String(nameOrId).toLowerCase(); // ép về chuỗi trước khi gọi API
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
   if (!res.ok) throw new Error("Không tìm thấy Pokémon!");
   return await res.json();
 }
+
 
 function displayPokemon(pokemon, containerId) {
   const container = document.getElementById(containerId);
@@ -129,10 +131,20 @@ async function searchPokemon() {
 }
 
 async function getRandomPokemon() {
-  const randomId = Math.floor(Math.random() * 898) + 1;
-  const pokemon = await fetchPokemon(randomId);
-  displayPokemon(pokemon, "randomDisplay");
+  const container = document.getElementById("randomDisplay");
+  container.innerHTML = "<p>🎲 Đang tải Pokémon ngẫu nhiên...</p>";
+  try {
+    const maxPokemon = 1025; // Cập nhật số lượng Pokémon mới nhất
+    const randomId = Math.floor(Math.random() * maxPokemon) + 1;
+
+    const pokemon = await fetchPokemon(randomId);
+    displayPokemon(pokemon, "randomDisplay");
+  } catch (err) {
+    console.error("Lỗi khi gọi API:", err);
+    container.innerHTML = "<p>❌ Không tải được Pokémon! Kiểm tra kết nối hoặc API.</p>";
+  }
 }
+
 
 // --- Quiz Mode ---
 async function loadQuiz() {
